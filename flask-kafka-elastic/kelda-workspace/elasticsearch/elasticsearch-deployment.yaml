@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: elasticsearch
+  name: elasticsearch
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 ()
+      creationTimestamp: null
+      labels:
+        io.kompose.network/elk: "true"
+        io.kompose.network/kafka-connect: "true"
+        io.kompose.service: elasticsearch
+    spec:
+      containers:
+      - env:
+        - name: CLUSTER_NAME
+          value: elastic.kafka-connect.sandbox
+        - name: ES_JAVA_OPTS
+          value: -Xms256m -Xmx1g
+          # Use single node discovery in order to disable production mode and avoid bootstrap checks
+          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+        - name: discovery.type
+          value: single-node
+        image: 'docker.elastic.co/elasticsearch/elasticsearch:7.5.1'
+        name: elasticsearch
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        resources: {}
+      restartPolicy: Always
+status: {}

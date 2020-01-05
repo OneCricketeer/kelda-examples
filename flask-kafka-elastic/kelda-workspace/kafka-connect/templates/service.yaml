@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "cp-kafka-connect.fullname" . }}
+  labels:
+    app: {{ template "cp-kafka-connect.name" . }}
+    chart: {{ template "cp-kafka-connect.chart" . }}
+    release: {{ .Values.helmReleaseName }}
+    heritage: {{ .Values.helmReleaseService }}
+spec:
+  ports:
+    - name: kafka-connect
+      port: {{ .Values.servicePort }}
+  selector:
+    app: {{ template "cp-kafka-connect.name" . }}
+    release: {{ .Values.helmReleaseName }}

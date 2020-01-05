@@ -1,0 +1,75 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: kafka-connect
+  name: kafka-connect
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 ()
+      creationTimestamp: null
+      labels:
+        io.kompose.network/kafka-backend: "true"
+        io.kompose.network/kafka-connect: "true"
+        io.kompose.network/kafka-frontend: "true"
+        io.kompose.service: kafka-connect
+    spec:
+      containers:
+      - env:
+        - name: CONNECT_BOOTSTRAP_SERVERS
+          value: kafka:9092
+        - name: CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR
+          value: "1"
+        - name: CONNECT_CONFIG_STORAGE_TOPIC
+          value: kafka-connect_connect_config
+        - name: CONNECT_CONSUMER_MAX_POLL_RECORDS
+          value: "500"
+        - name: CONNECT_GROUP_ID
+          value: cg_kafka-connect
+        - name: CONNECT_INTERNAL_KEY_CONVERTER
+          value: org.apache.kafka.connect.json.JsonConverter
+        - name: CONNECT_INTERNAL_VALUE_CONVERTER
+          value: org.apache.kafka.connect.json.JsonConverter
+        - name: CONNECT_KEY_CONVERTER
+          value: org.apache.kafka.connect.converters.ByteArrayConverter
+        - name: CONNECT_LOG4J_LOGGERS
+          value: org.reflections=ERROR
+        - name: CONNECT_LOG4J_ROOT_LOGLEVEL
+          value: INFO
+        - name: CONNECT_OFFSET_FLUSH_INTERVAL_MS
+          value: "900000"
+        - name: CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR
+          value: "1"
+        - name: CONNECT_OFFSET_STORAGE_TOPIC
+          value: kafka-connect_connect_offsets
+        - name: CONNECT_PLUGIN_PATH
+          value: /usr/share/java
+        - name: CONNECT_REST_ADVERTISED_HOST_NAME
+          value: kafka-connect
+        - name: CONNECT_STATUS_STORAGE_REPLICATION_FACTOR
+          value: "1"
+        - name: CONNECT_STATUS_STORAGE_TOPIC
+          value: kafka-connect_connect_status
+        - name: CONNECT_TASK_SHUTDOWN_GRACEFUL_TIMEOUT_MS
+          value: "30000"
+        - name: CONNECT_VALUE_CONVERTER
+          value: org.apache.kafka.connect.converters.ByteArrayConverter
+        - name: CONNECT_ZOOKEEPER_CONNECT
+          value: zookeeper:2181/kafka
+        image: 'confluentinc/cp-kafka-connect:5.3.1'
+        name: kafka-connect
+        ports:
+        - containerPort: 8083
+        resources: {}
+      hostname: kafka-connect
+      restartPolicy: Always
+status: {}

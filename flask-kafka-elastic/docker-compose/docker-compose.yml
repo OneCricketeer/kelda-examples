@@ -1,0 +1,136 @@
+version: '3.0'
+
+networks:
+  elk:
+  kafka-connect:
+  kafka-backend:
+  kafka-frontend:
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_TAG}
+    ports:
+      - 9200:9200/tcp
+      - 9300:9300/tcp
+    networks:
+      elk:
+      kafka-connect:
+    environment:
+      CLUSTER_NAME: elastic.kafka-connect.sandbox
+      ES_JAVA_OPTS: -Xms256m -Xmx1g
+      bootstrap.memory_lock: "true"
+      discovery.type: single-node
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_TAG}
+    ports:
+      - 5601:5601/tcp
+    networks:
+      elk:
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      SERVER_NAME: kibana.kafka-connect.sandbox
+
+  ### Kafka
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:${CP_TAG}
+    ports:
+      - 2181:2181/tcp
+    networks:
+      kafka-backend:
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    depends_on:
+      - zookeeper
+    image: confluentinc/cp-kafka:${CP_TAG}
+    ports:
+      - 9092:9092/tcp  # For within docker network
+      - 29092:29092/tcp  # For external clients
+    networks:
+      kafka-backend:
+      kafka-frontend:
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
+
+  kafka-connect:
+    depends_on:
+      - kafka
+      - zookeeper
+    image: confluentinc/cp-kafka-connect:${CP_TAG}
+    hostname: kafka-connect
+    ports:
+      - 8083:8083/tcp
+    networks:
+      kafka-backend:
+      kafka-connect:
+      kafka-frontend:
+    environment:
+      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_GROUP_ID: cg_kafka-connect
+
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 900000
+      CONNECT_TASK_SHUTDOWN_GRACEFUL_TIMEOUT_MS: 30000
+
+      CONNECT_CONSUMER_MAX_POLL_RECORDS: 500
+
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_TOPIC: kafka-connect_connect_config
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: kafka-connect_connect_offsets
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: kafka-connect_connect_status
+
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.converters.ByteArrayConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.converters.ByteArrayConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+
+      CONNECT_PLUGIN_PATH: /usr/share/java # ,/etc/kafka-connect/uber/,/etc/kafka-connect/plugins
+
+    # volumes:
+    #   - ./kafka-connect/jars:/etc/kafka-connect/uber:ro
+    #   - ./kafka-connect/plugins:/etc/kafka-connect/plugins:ro
+    #   - ./kafka-connect/jdbc-jars:/usr/share/java/kafka-connect-jdbc/lib:ro
+
+  kafka-connect-ui:
+    depends_on:
+      - kafka-connect
+    image: landoop/kafka-connect-ui:0.9.6
+    hostname: kafka-connect-ui
+    ports:
+      - 8003:8000/tcp
+    networks:
+      kafka-connect:
+      kafka-frontend:
+    environment:
+      CONNECT_URL: http://kafka-connect:8083/
+      PROXY: "true"
+
+  # schema-registry:
+  #   depends_on:
+  #   - kafka
+  #   image: confluentinc/cp-schema-registry:${CP_TAG}
+  #   hostname: schema-registry
+  #   ports:
+  #   - 8081:8081/tcp
+  #   networks:
+  #     kafka-backend:
+  #     kafka-frontend:
+  #   environment:
+  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+

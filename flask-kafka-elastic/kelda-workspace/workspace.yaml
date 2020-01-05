@@ -1,0 +1,12 @@
+version: "v1alpha1"
+
+tunnels:
+- serviceName: elasticsearch
+  remotePort: 9200
+  localPort: 9200
+- serviceName: kibana
+  remotePort: 5601
+  localPort: 5601
+- serviceName: kafka-connect
+  remotePort: 8083
+  localPort: 8083
