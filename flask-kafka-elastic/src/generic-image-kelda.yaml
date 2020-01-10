@@ -1,0 +1,12 @@
+version: "v1alpha1"
+name: "data-generator"
+initCommand: ["pip", "install", "--no-cache-dir", "-r", "requirements.txt"]
+command: ["flask", "run", "--port", "80"]
+image: "python:3.7"
+sync:
+  - from: requirements.txt
+    to: .
+    triggerInit: true
+  - from: .
+    to: .
+    except: ['venv']

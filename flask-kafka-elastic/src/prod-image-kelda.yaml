@@ -1,0 +1,6 @@
+version: "v1alpha1"
+name: "data-generator"
+command: ["flask", "run", "--port", "80"]
+sync:
+  - from: .
+    to: .
