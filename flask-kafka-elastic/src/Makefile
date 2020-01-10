@@ -9,6 +9,9 @@ GUNICORN_CMD_ARGS?="pserve --reload"
 build-docker:
 	docker build -t $(REPO)/$(TAG):$(VERSION) .
 
+push-docker: build-docker
+	docker push $(REPO)/$(TAG):$(VERSION)
+
 clean-docker:
 	docker rmi $(REPO)/$(TAG):$(VERSION)
 
