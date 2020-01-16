@@ -1,0 +1,4 @@
+imageTag: 0.1.0
+
+kafkaBootstrapServers: kelda-demo-cp-kafka:9092
+kafkaTopicName: shaw-products

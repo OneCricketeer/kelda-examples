@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: data-gen
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: data-gen
+    spec:
+      containers:
+      - image: cricketeerone/kelda-starter-flask-kafka:{{ .Values.imageTag }}
+        name: data-generator
+        env:
+          - name: KAFKA_BOOTSTRAP_SERVERS
+            value: {{ .Values.kafkaBootstrapServers }}
+          - name: KAFKA_TOPIC
+            value: {{ .Values.kafkaTopicName }}

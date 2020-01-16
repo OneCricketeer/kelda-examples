@@ -108,6 +108,25 @@ def makeEntry(timestamp, data_format="json"):
                       chosen_product.sellstyle, chosen_product.cost]))
 
 
+def generate(num, peaks, day_range=range(-2, 1), data_format='json'):
+    '''
+    num: Some multiplier to get more data
+    peaks: List of tuples for (peak_hour,multiplier,stddev)
+    day_range: (iterable) decides how many days to generate data against
+    data_format: [json|csv] Format to create the records in
+    '''
+    if data_format == "csv":
+        print("|".join(
+            ["timestamp", "warehouse_id", "warehouse_city", "warehouse_loc_lat", "warehouse_loc_long",
+                "product_name", "product_cost"]))
+
+    for day in day_range:
+        for (peak, factor, stddev) in peaks:
+            for x in range(int(num * factor * stddev)):
+                entry_time = formatHrMin(*randomTime(day, random.gauss(peak, stddev)))
+                entry = makeEntry(entry_time, data_format)
+                yield entry
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Wrong number of arguments")
@@ -117,15 +136,8 @@ if __name__ == '__main__':
     data_format = "json"  # default to JSON
     if len(sys.argv) == 3:
         data_format = sys.argv[2]
-        if data_format == "csv":
-            print("|".join(
-                ["timestamp", "warehouse_id", "warehouse_city", "warehouse_loc_lat", "warehouse_loc_long",
-                 "product_name", "product_cost"]))
     # (peak_hour,multiplier,stddev)
     peaks = [(2, 0.25, 1), (7, 1, 1), (12, 4, 2), (18, 3, 2)]
-    # last 3 days from now
-    for day in range(-2, 1):
-        for (peak, factor, stddev) in peaks:
-            for x in range(int(num * factor * stddev)):
-                entry_time = formatHrMin(*randomTime(day, random.gauss(peak, stddev)))
-                print(makeEntry(entry_time, data_format))
+    for entry in generate(num, peaks, data_format=data_format):
+        print(entry)
+    

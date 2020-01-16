@@ -10,27 +10,13 @@ curl -XDELETE "http://${ES_ADDR}/${ES_INDEX}"
 curl -XPUT "http://${ES_ADDR}/${ES_INDEX}" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
-    "_doc": {
-      "properties": {
-        "event_time": {
-          "type": "date"
-        },
-        "product": {
-          "type": "keyword"
-        },
-        "warehouseId": {
-          "type": "keyword"
-        },
-        "city": {
-          "type": "text"
-        },
-        "cost": {
-          "type": "float"
-        },
-        "location": {
-          "type": "geo_point"
-        }
-      }
+    "properties": {
+      "event_time":  { "type": "date"    },
+      "product":     { "type": "keyword" },
+      "warehouseId": { "type": "keyword" },
+      "city":        { "type": "text"    },
+      "cost":        { "type": "float"   },
+      "location":    { "type": "geo_point" }
     }
   }
 }'

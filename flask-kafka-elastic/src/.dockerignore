@@ -2,3 +2,6 @@ version.txt
 Makefile
 __pycache__
 .git/
+.gitignore
+README.md
+kelda.yaml

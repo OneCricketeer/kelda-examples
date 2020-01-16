@@ -5,6 +5,9 @@ ENV STATIC_URL /static
 ENV STATIC_PATH /app/app/static
 
 WORKDIR /app
+
+COPY prestart.sh /app
+
 COPY requirements.txt /
 RUN pip install --no-cache-dir -r /requirements.txt
 COPY app /app/app
