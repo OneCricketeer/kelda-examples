@@ -23,3 +23,6 @@ run-docker-dev:
     -v $(PWD)/app:/app/app:ro \
     -p $(HOST_HTTP_PORT):80 \
     $(REPO)/$(TAG):$(VERSION)
+
+push-docker: build-docker
+	docker push $(REPO)/$(TAG):$(VERSION)

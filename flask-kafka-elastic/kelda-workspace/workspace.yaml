@@ -10,3 +10,6 @@ tunnels:
 - serviceName: kafka-connect
   remotePort: 8083
   localPort: 8083
+- serviceName: data-gen
+  remotePort: 80
+  localPort: 8080

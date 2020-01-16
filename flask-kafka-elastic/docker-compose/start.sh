@@ -3,7 +3,8 @@
 set -e
 
 export TOPIC='shaw-products'
-KIBANA_VERSION=$(grep ELASTIC_TAG .env | cut -d= -f2)
+KIBANA_VERSION="$(grep ELASTIC_TAG .env | cut -d= -f2)"
+KIBANA_URL='http://localhost:5601'
 
 function create_index_mapping() {
   if [ "$#" -ne 1 ]; then
@@ -17,9 +18,9 @@ function create_index_mapping() {
 function create_index_pattern() {
   echo -e "\n\n==> Creating Kibana Index Pattern"
   sleep 3
-  curl -X POST 'http://localhost:5601/api/saved_objects/index-pattern' --compressed \
+  curl -X POST "${KIBANA_URL}/api/saved_objects/index-pattern" --compressed \
       -H "kbn-version: ${KIBANA_VERSION}" -H 'content-type: application/json' \
-      -H 'Referer: http://localhost:5601/app/kibana' \
+      -H "Referer: ${KIBANA_URL}/app/kibana" \
       --data '{"attributes":{"title":"shaw-*","timeFieldName":"event_time"}}'
 }
 
@@ -34,10 +35,10 @@ function finish() {
   sleep 5
 
   # Kafka Connect UI
-  open http://localhost:8003
+  #open http://localhost:8003
 
   # Kibana
-  open 'http://localhost:5601/app/kibana#/discover?_g=(time:(from:now%2Fw,mode:quick,to:now%2Fw))&_a=(columns:!(_source),interval:auto,sort:!(event_time,desc))'
+  open "${KIBANA_URL}/app/kibana#/discover?_g=(time:(from:now%2Fw,mode:quick,to:now%2Fw))&_a=(columns:!(_source),interval:auto,sort:!(event_time,desc))"
 }
 
 function docker_compose() {

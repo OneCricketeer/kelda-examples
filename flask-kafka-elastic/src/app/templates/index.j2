@@ -12,5 +12,9 @@
     to the URL (for example: <code>/Thelonious</code>) to say hello to
     someone specific.</p>
     {% endif %}
-  </body>
+    {% if kafka_bootstrap %}
+    <p>Kafka is available at <b><code>{{ kafka_bootstrap }}</code></b></p>
+    <p>Send data to it by issuing a <code>POST /generate</code></p>
+    {% endif %}
+    </body>
 </html>
