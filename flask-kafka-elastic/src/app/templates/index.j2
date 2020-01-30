@@ -15,6 +15,11 @@
     {% if kafka_bootstrap %}
     <p>Kafka is available at <b><code>{{ kafka_bootstrap }}</code></b></p>
     <p>Send data to it by issuing a <code>POST /generate</code></p>
+    <form action="/generate" method="GET">
+      Record count:<br>
+      <input type="text" name="c">
+      <input type="submit" value="Generate">
+    </form>
     {% endif %}
     </body>
 </html>

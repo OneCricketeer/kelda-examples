@@ -53,7 +53,7 @@ def index():
     # say_hello(instances=int(count), topic_name=topic_name)
     return resp
 
-@app.route('/generate', methods=['POST'])
+@app.route('/generate', methods=['GET'])
 def generate():
   args = request.args
   count = int(args.get('c', 1))
