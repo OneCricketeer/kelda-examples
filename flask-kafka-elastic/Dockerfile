@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY prestart.sh /app
 
-COPY requirements.txt /
+COPY src/requirements.txt /
 RUN pip install --no-cache-dir -r /requirements.txt
-COPY app /app/app
-COPY main.py /app
+COPY src/app /app/app
+COPY src/main.py /app
