@@ -1,10 +1,19 @@
 # Elastic/Kafka/Kibana (EKK) pipelines
 
-*Getting started*
+- [x] *Getting started*
 
 1. Converted `docker-compose` folder to using k8s with <https://kompose.io> 
 2. Restructured services into workspaces for [`kelda`](https://kelda.io)
 3. Created `data-gen` (Python) app
+
+## Running
+
+Install [`kelda`](https://kelda.io)
+
+```
+cd flask-kafka-elastic
+kelda dev data-gen
+```
 
 ## TODO
 
