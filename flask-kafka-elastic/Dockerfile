@@ -6,7 +6,7 @@ ENV STATIC_PATH /app/app/static
 
 WORKDIR /app
 
-COPY prestart.sh /app
+COPY src/prestart.sh /app
 
 COPY src/requirements.txt /
 RUN pip install --no-cache-dir -r /requirements.txt
