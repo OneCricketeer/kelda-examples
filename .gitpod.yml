@@ -1,11 +1,19 @@
-image:
-  file: flask-kafka-elastic/src/Dockerfile
+image: cricketeerone/docker-kelda:0.1.0
 
-tasks:
-  - init: "python3 -m pip install --no-cache-dir -r flask-kafka-elastic/src/requirements.txt"
-    command: "flask run --port 8080"
+# tasks:
+#   - init: "python3 -m pip install --no-cache-dir -r flask-kafka-elastic/src/requirements.txt"
+#     command: "flask run --port 8080"
 
 # List the ports you want to expose and what to do when they are served. See https://www.gitpod.io/docs/config-ports/
-ports:
-  - port: 8080
-    onOpen: open-preview
+# ports:
+#   - port: 8080
+#     onOpen: open-preview
+
+# checkoutLocation: "."
+workspaceLocation: "."
+tasks:
+  - command: |
+      cd /workspace/flask-kafka-elastic/
+      ln -sf /workspace/flask-kafka-elastic/src/ /app
+      ln -sf /workspace/flask-kafka-elastic/src/kelda-workspace/workspace.yaml /workspace.yaml
+      kelda dev /app
