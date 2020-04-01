@@ -4,7 +4,7 @@ from flask import render_template, request, Response
 from app import app
 from . import kafka_producer as producer
 from .config import topic_name, bootstrap as kafka_bootstrap
-from .gen.shaw_gen import generate as generate_shaw
+from .gen.sonic_gen import generate as generate_sonic
 
 kafka_buffer_limit = 100000  # TODO: check where this limit is set
 
@@ -18,9 +18,7 @@ def generate_data(instances=1, topic_name=None):
         logging.error('topic_name was not defined')
         return None
 
-    # payload = f'{username}, says hello'
-
-    logging.info(f'pre-flush producer')
+    logging.info('pre-flush producer')
     producer.flush()
     logging.debug(f'producing {instances} messages')
     _count = 0
@@ -28,7 +26,7 @@ def generate_data(instances=1, topic_name=None):
     peaks = [(2, 0.25, 1), (7, 1, 1), (12, 4, 2), (18, 3, 2)]
     try:
         #for _ in range(instances):
-        for payload in generate_shaw(instances, peaks):
+        for payload in generate_sonic(instances, peaks):
             producer.produce(topic_name, payload)
             _count += 1
             if _count >= kafka_buffer_limit:
@@ -40,7 +38,7 @@ def generate_data(instances=1, topic_name=None):
         logging.error('flushing producer on buffer error', e)
         producer.flush()
 
-    logging.info(f'post-flush producer')
+    logging.info('post-flush producer')
     producer.flush()
     logging.debug(f'sent {(_limit_breach * kafka_buffer_limit) + _count} messages')
 

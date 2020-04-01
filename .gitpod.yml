@@ -1,0 +1,11 @@
+image:
+  file: flask-kafka-elastic/src/Dockerfile
+
+tasks:
+  - init: "pip install --no-cache-dir -r requirements.txt"
+    command: "flask run --port 8080"
+
+# List the ports you want to expose and what to do when they are served. See https://www.gitpod.io/docs/config-ports/
+ports:
+  - port: 8080
+    onOpen: open-preview
