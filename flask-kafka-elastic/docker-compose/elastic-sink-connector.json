@@ -1,9 +1,9 @@
 {
-    "name": "elastic-sink-shaw",
+    "name": "elastic-sink",
     "config": {
         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
         "tasks.max": "5",
-        "topics": "sonic-products",
+        "topics": "blimp-demo",
 
         "value.converter": "org.apache.kafka.connect.json.JsonConverter",
         "value.converter.schemas.enable": "false",
