@@ -35,7 +35,7 @@ services:
 
   ### Kafka
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.0.1
+    image: confluentinc/cp-zookeeper:5.4.1
     ports:
       - 2181:2181
     # networks:
@@ -46,7 +46,7 @@ services:
   kafka:
     depends_on:
       - zookeeper
-    image: confluentinc/cp-kafka:5.0.1
+    image: confluentinc/cp-kafka:5.4.1
     ports:
       - 9092:9092  # For within docker network
       - 29092:29092  # For external clients
@@ -55,8 +55,8 @@ services:
     #   kafka-frontend:
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
-      KAFKA_LISTENERS: PLAINTEXT:0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -65,7 +65,7 @@ services:
     depends_on:
       - kafka
       - zookeeper
-    image: confluentinc/cp-kafka-connect:5.0.1
+    image: confluentinc/cp-kafka-connect:5.4.1
     # hostname: kafka-connect   # error unmarshaling JSON: while decoding JSON: json: unknown field "hostname"
     ports:
       - 8083:8083
@@ -74,7 +74,7 @@ services:
     #   kafka-connect:
     #   kafka-frontend:
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
       CONNECT_GROUP_ID: cg_kafka-connect
 
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
@@ -100,36 +100,36 @@ services:
 
       CONNECT_PLUGIN_PATH: /usr/share/java # ,/etc/kafka-connect/uber/,/etc/kafka-connect/plugins
 
-  kafka-connect-ui:
-    depends_on:
-      - kafka-connect
-    image: landoop/kafka-connect-ui:0.9.6
+  #kafka-connect-ui:
+  #  depends_on:
+  #    - kafka-connect
+  #  image: landoop/kafka-connect-ui:0.9.6
     # hostname: kafka-connect-ui
-    ports:
-      - 8003:8000
+  #  ports:
+  #    - 8003:8000
     # networks:
     #   kafka-connect:
     #   kafka-frontend:
-    environment:
-      CONNECT_URL: http://kafka-connect:8083/
-      PROXY: "true"
+  #  environment:
+  #    CONNECT_URL: http://kafka-connect:8083/
+  #    PROXY: "true"
 
-  schema-registry:
-    depends_on:
-    - kafka
-    image: confluentinc/cp-schema-registry:5.0.1
+  #schema-registry:
+  #  depends_on:
+  #  - kafka
+  #  image: confluentinc/cp-schema-registry:5.0.1
     # hostname: schema-registry
-    ports:
-    - 8081:8081
+  #  ports:
+  #  - 8081:8081
     # networks:
     #   kafka-backend:
     #   kafka-frontend:
-    environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: backward_transitive
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: '*'
+  #  environment:
+  #    SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+  #    SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+  #    SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+  #    SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: backward_transitive
+  #    SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #    SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: '*'
       
       
