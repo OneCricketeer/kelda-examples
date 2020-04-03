@@ -84,12 +84,15 @@ def makeEntry(timestamp, data_format="json", date_fmt='%Y-%m-%dT%H:%M:%SZ'):
     utc_date = date - timedelta(hours=store.utc)
     menu_item = chooseFood(date.hour, store.id)
 
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
+    geopoint = ",".join(map(str, store.loc[::-1]))
+
     if data_format == "json":
         data = {
             'event_time': utc_date.strftime(date_fmt),
             'storeId': store.id,
             'city': store.city,
-            'geoip': {'location': store.loc},
+            'location': geopoint,
             'food': menu_item.name,
             'cost': menu_item.cost
         }

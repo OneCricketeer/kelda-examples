@@ -2,7 +2,7 @@
 
 set -e
 
-export TOPIC='shaw-products'
+export TOPIC='sonic-products'
 KIBANA_VERSION="$(grep ELASTIC_TAG .env | cut -d= -f2)"
 KIBANA_URL='http://localhost:5601'
 
@@ -12,7 +12,7 @@ function create_index_mapping() {
     exit 1;
   fi
   echo -e "\n\n==> Creating ElasticSearch Indicies..."
-  ES_INDEX="${1}" ./shaw-es-mapping.sh
+  ES_INDEX="${1}" ./sonic-es-mapping.sh
 }
 
 function create_index_pattern() {
@@ -21,7 +21,7 @@ function create_index_pattern() {
   curl -X POST "${KIBANA_URL}/api/saved_objects/index-pattern" --compressed \
       -H "kbn-version: ${KIBANA_VERSION}" -H 'content-type: application/json' \
       -H "Referer: ${KIBANA_URL}/app/kibana" \
-      --data '{"attributes":{"title":"shaw-*","timeFieldName":"event_time"}}'
+      --data '{"attributes":{"title":"sonic-*","timeFieldName":"event_time"}}'
 }
 
 function post_connector() {
@@ -61,7 +61,8 @@ function docker_compose() {
   echo -e "\n\n==> Producing Data to Kafka topic='${TOPIC}'..."
   ## To show the data. Run this before the load script to see active consumption
   # docker-compose -p testkafkaelastickibana exec kafka bash -c "kafka-console-consumer --bootstrap-server localhost:9092 --topic shaw-products --from-beginning"
-  ./load-data.sh
+  # ./load-data.sh
+  curl -X POST 'http://localhost:8080/generate?c=10000'
 
   create_index_pattern
 
