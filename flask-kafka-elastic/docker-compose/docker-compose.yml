@@ -7,6 +7,15 @@ version: '3.0'
 #   kafka-frontend:
 
 services:
+  data-gen:
+    image: cricketeerone/kelda-starter-flask-kafka:0.1.1
+    name: data-generator
+    env:
+      - name: KAFKA_BOOTSTRAP_SERVERS
+        value: kafka:9092
+      - name: KAFKA_TOPIC
+        value: blimp-demo
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.5.1
     ports:
@@ -131,5 +140,3 @@ services:
   #    SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: backward_transitive
   #    SCHEMA_REGISTRY_HOST_NAME: schema-registry
   #    SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: '*'
-      
-      

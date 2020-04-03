@@ -23,7 +23,7 @@ def generate_data(instances=1, topic_name=None):
     logging.debug(f'producing {instances} messages')
     _count = 0
     _limit_breach = 0
-    peaks = [(2, 0.25, 1), (7, 1, 1), (12, 4, 2), (18, 3, 2)]
+    peaks = [(2, 0.25, 1), (11, 1, 1), (19, 4, 2)]  # , (18, 3, 2)
     try:
         #for _ in range(instances):
         for payload in generate_sonic(instances, peaks):
