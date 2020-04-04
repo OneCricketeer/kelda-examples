@@ -11,7 +11,7 @@ kafka_admin = kafka.get_admin_client(config.bootstrap)
 
 if config.topic_name:
     logging.debug('creating kafka topic {}'.format(config.topic_name))
-    kafka.create_topic(kafka_admin, config.topic_name)
+    kafka.create_topic(kafka_admin, config.topic_name, partitions=5)
 
 app = Flask(__name__)
 

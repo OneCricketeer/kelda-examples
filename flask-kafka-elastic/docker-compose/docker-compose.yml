@@ -1,81 +1,90 @@
 version: '3.0'
 
-networks:
-  elk:
-  kafka-connect:
-  kafka-backend:
-  kafka-frontend:
+# networks:  # error unmarshaling JSON: while decoding JSON: json: unknown field "networks"
+#   elk:
+#   kafka-connect:
+#   kafka-backend:
+#   kafka-frontend:
 
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_TAG}
+  # Local application (where changes are made)
+  data-gen:
+    image: cricketeerone/kelda-starter-flask-kafka:0.1.2
     ports:
-      - 9200:9200/tcp
-      - 9300:9300/tcp
-    networks:
-      elk:
-      kafka-connect:
+      - '8080:80'
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: blimp-demo
+
+  # ELK
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    # networks:  # error unmarshaling JSON: while decoding JSON: json: unknown field "networks"
+    #   elk:
+    #   kafka-connect:
     environment:
       CLUSTER_NAME: elastic.kafka-connect.sandbox
       ES_JAVA_OPTS: -Xms256m -Xmx1g
       bootstrap.memory_lock: "true"
       discovery.type: single-node
-
   kibana:
     depends_on:
       - elasticsearch
-    image: docker.elastic.co/kibana/kibana:${ELASTIC_TAG}
+    image: docker.elastic.co/kibana/kibana:6.5.1
     ports:
-      - 5601:5601/tcp
-    networks:
-      elk:
+      - 5601:5601
+    # networks:
+    #   elk:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       SERVER_NAME: kibana.kafka-connect.sandbox
 
   ### Kafka
-
   zookeeper:
-    image: confluentinc/cp-zookeeper:${CP_TAG}
+    image: confluentinc/cp-zookeeper:5.4.1
     ports:
-      - 2181:2181/tcp
-    networks:
-      kafka-backend:
+      - 2181:2181
+    # networks:
+    #   kafka-backend:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-
   kafka:
     depends_on:
       - zookeeper
-    image: confluentinc/cp-kafka:${CP_TAG}
+    image: confluentinc/cp-kafka:5.4.1
     ports:
-      - 9092:9092/tcp  # For within docker network
-      - 29092:29092/tcp  # For external clients
-    networks:
-      kafka-backend:
-      kafka-frontend:
+      - 9092:9092  # For local host clients
+      # - 29092:29092  # For within docker network
+    # networks:
+    #   kafka-backend:
+    #   kafka-frontend:
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_BROKER_ID: 101
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
 
+  # Logstash equivalent
   kafka-connect:
     depends_on:
       - kafka
       - zookeeper
-    image: confluentinc/cp-kafka-connect:${CP_TAG}
-    hostname: kafka-connect
+    image: confluentinc/cp-kafka-connect:5.4.1
+    # hostname: kafka-connect   # error unmarshaling JSON: while decoding JSON: json: unknown field "hostname"
     ports:
-      - 8083:8083/tcp
-    networks:
-      kafka-backend:
-      kafka-connect:
-      kafka-frontend:
+      - 8083:8083
+    # networks:
+    #   kafka-backend:
+    #   kafka-connect:
+    #   kafka-frontend:
     environment:
-      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
-      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
       CONNECT_GROUP_ID: cg_kafka-connect
 
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
@@ -101,36 +110,34 @@ services:
 
       CONNECT_PLUGIN_PATH: /usr/share/java # ,/etc/kafka-connect/uber/,/etc/kafka-connect/plugins
 
-    # volumes:
-    #   - ./kafka-connect/jars:/etc/kafka-connect/uber:ro
-    #   - ./kafka-connect/plugins:/etc/kafka-connect/plugins:ro
-    #   - ./kafka-connect/jdbc-jars:/usr/share/java/kafka-connect-jdbc/lib:ro
-
-  kafka-connect-ui:
-    depends_on:
-      - kafka-connect
-    image: landoop/kafka-connect-ui:0.9.6
-    hostname: kafka-connect-ui
-    ports:
-      - 8003:8000/tcp
-    networks:
-      kafka-connect:
-      kafka-frontend:
-    environment:
-      CONNECT_URL: http://kafka-connect:8083/
-      PROXY: "true"
-
-  # schema-registry:
+  # kafka-connect-ui:
   #   depends_on:
-  #   - kafka
-  #   image: confluentinc/cp-schema-registry:${CP_TAG}
-  #   hostname: schema-registry
+  #   - kafka-connect
+  #   image: landoop/kafka-connect-ui:0.9.6
+  #   hostname: kafka-connect-ui
   #   ports:
-  #   - 8081:8081/tcp
-  #   networks:
-  #     kafka-backend:
-  #     kafka-frontend:
+  #   - 8003:8000
+  #   # networks:
+  #   #   kafka-connect:
+  #   #   kafka-frontend:
   #   environment:
-  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
-  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+  #     CONNECT_URL: http://kafka-connect:8083/
+  #     PROXY: "true"
 
+  #schema-registry:
+  #  depends_on:
+  #  - kafka
+  #  image: confluentinc/cp-schema-registry:5.0.1
+    # hostname: schema-registry
+  #  ports:
+  #  - 8081:8081
+    # networks:
+    #   kafka-backend:
+    #   kafka-frontend:
+  #  environment:
+  #    SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+  #    SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+  #    SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+  #    SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: backward_transitive
+  #    SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #    SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: '*'
