@@ -1,3 +1,8 @@
-[Work in Progress]
+flask-kafka-elastic
+===
 
-Convert `docker-compose` folder to using [`kelda`](https://kelda.io)
+Web service that generates Kafka records in Python/Flask, sinks data to Elasticsearch, then allows for data visualizations in Kibana
+
+### Credits
+
+Built using [`kelda`](https://kelda.io). 
