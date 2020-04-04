@@ -21,7 +21,7 @@ function create_index_pattern() {
   curl -w'\n' -X POST "${KIBANA_URL}/api/saved_objects/index-pattern" --compressed \
       -H "kbn-version: ${KIBANA_VERSION}" -H 'content-type: application/json' \
       -H "Referer: ${KIBANA_URL}/app/kibana" \
-      --data '{"attributes":{"title":"sonic-*","timeFieldName":"event_time"}}'
+      --data '{"attributes":{"title":"blimp-demo","timeFieldName":"event_time"}}'
 }
 
 function post_connector() {
@@ -46,53 +46,31 @@ function load_data() {
   ## To show the data. Run this before the load script to see active consumption
   # docker-compose -p testkafkaelastickibana exec kafka bash -c "kafka-console-consumer --bootstrap-server localhost:9092 --topic shaw-products --from-beginning"
   # ./load-data.sh
-  curl -v -X POST 'http://localhost:8080/generate?c=1000'
+  curl -v 'http://localhost:8080/generate?c=1000'
+}
 
-  # post_connector
+function main() { 
+  # docker-compose -p testkafkaelastickibana up -d
+  
+  echo "==> Waiting for services to start up..."
+  sleep 45
+
+  create_index_mapping $TOPIC
+
+  # echo -e "\n\n==> Creating Kafka Topics..."
+  # DOCKER_KAFKA_ZK_CHROOT='zookeeper:2181'
+  # docker-compose -p testkafkaelastickibana exec kafka bash -c \
+  # "kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect-configs --replication-factor 1 --partitions 1 --config cleanup.policy=compact --disable-rack-aware \
+  #   && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect-offsets --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
+  #   && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect-status --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
+  #   && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic ${TOPIC} --replication-factor 1 --partitions 5"
+
+  load_data
+
+  post_connector
+  sleep 10
   create_index_pattern
-}
-
-function demo_docker_compose() {
-  docker-compose -p testkafkaelastickibana up -d
-  echo "==> Waiting for services to start up..."
-  sleep 45
-
-  create_index_mapping $TOPIC
-
-  echo -e "\n\n==> Creating Kafka Topics..."
-  DOCKER_KAFKA_ZK_CHROOT='zookeeper:2181/kafka'
-  docker-compose -p testkafkaelastickibana exec kafka bash -c \
-  "kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_configs --replication-factor 1 --partitions 1 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_offsets --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_status --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic ${TOPIC} --replication-factor 1 --partitions 5"
-
-  load_data
 
   open_kibana
 }
 
-function demo_blimp() {
-  blimp up
-  echo "==> Waiting for services to start up..."
-  sleep 45
-
-  create_index_mapping $TOPIC
-
-  echo -e "\n\n==> Creating Kafka Topics..."
-  DOCKER_KAFKA_ZK_CHROOT='zookeeper:2181/kafka'
-  docker-compose -p testkafkaelastickibana exec kafka bash -c \
-  "kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_configs --replication-factor 1 --partitions 1 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_offsets --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic kafka-connect_status --replication-factor 1 --partitions 10 --config cleanup.policy=compact --disable-rack-aware \
-    && kafka-topics --create --if-not-exists --zookeeper ${DOCKER_KAFKA_ZK_CHROOT} --topic ${TOPIC} --replication-factor 1 --partitions 5"
-
-  load_data
-
-  open_kibana
-}
-
-
-# function main() { 
-demo_blimp
-# }
