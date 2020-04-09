@@ -1,1 +1,4 @@
 *.pyc
+
+.kelda_syncthing/
+*.sync-conflict*

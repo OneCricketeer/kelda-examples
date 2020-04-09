@@ -45,7 +45,6 @@ def generate_data(instances=1, topic_name=None):
 
 @app.route('/')
 def index():
-    args = request.args
     resp = render_template('index.j2', kafka_bootstrap=kafka_bootstrap)
     # count = args.get('c', 1)
     # say_hello(instances=int(count), topic_name=topic_name)
@@ -59,11 +58,8 @@ def generate():
     generate_data(count, topic_name=topic_name)
     return Response('data sent', status=202)
 
-# @app.route('/<username>')
-# def hello(username):
-#     args = request.args
-#     resp = render_template('index.j2', username=username,
-#                            kafka_bootstrap=kafka_bootstrap)
-#     count = args.get('c', 1)
-#     say_hello(username, instances=int(count), topic_name=topic_name)
-#     return resp
+@app.route('/<username>')
+def hello(username):
+    resp = render_template('index.j2', username=username,
+                           kafka_bootstrap=kafka_bootstrap)
+    return resp
