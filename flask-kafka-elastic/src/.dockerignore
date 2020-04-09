@@ -1,7 +1,16 @@
+# python
+__pycache__/
+venv/
+
+# ops 
 version.txt
 Makefile
-__pycache__
+
+# github
 .git/
 .gitignore
 README.md
+
+# kelda
 kelda.yaml
+.kelda_syncthing/

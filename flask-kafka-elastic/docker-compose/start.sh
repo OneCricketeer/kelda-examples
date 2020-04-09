@@ -52,8 +52,8 @@ function load_data() {
 function main() { 
   # docker-compose -p testkafkaelastickibana up -d
   
-  echo "==> Waiting for services to start up..."
-  sleep 45
+  # echo "==> Waiting for services to start up..."
+  # sleep 45
 
   create_index_mapping $TOPIC
 
