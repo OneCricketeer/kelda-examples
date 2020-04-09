@@ -1,9 +1,10 @@
 from flask import render_template, request, Response
 
-from app import app
+from app import app, dto
 from .config import topic_name, bootstrap as kafka_bootstrap
-import dto
 
+
+kafka_dto = dto.Kafka()
 
 @app.route('/')
 def index():
@@ -14,7 +15,7 @@ def index():
 def generate():
     args = request.args
     count = int(args.get('c', 1))
-    dto.generate_data(count, topic_name=topic_name)
+    kafka_dto.generate_data(count, topic_name=topic_name)
     return Response('data sent', status=202)
 
 

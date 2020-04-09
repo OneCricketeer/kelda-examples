@@ -19,7 +19,7 @@ run-docker:
 
 run-docker-dev:
 	docker run --rm -ti \
-		-e GUNICORN_CMD_ARGS="$(GUNICORN_CMD_ARGS)" \
+		-e GUNICORN_CMD_ARGS=$(GUNICORN_CMD_ARGS) \
     -v $(PWD)/app:/app/app:ro \
     -p $(HOST_HTTP_PORT):80 \
     $(REPO)/$(TAG):$(VERSION)
